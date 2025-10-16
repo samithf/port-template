@@ -60,7 +60,7 @@ export function TreeNode({
   const [fieldValue, setFieldValue] = useState(node.value);
 
   const countDescendants = (node: TreeNodeType): number =>
-    node.children.reduce((acc, child) => acc + 1 + countDescendants(child), 0);
+    node?.children.reduce((acc, child) => acc + 1 + countDescendants(child), 0);
 
   const hasMoreThanOneChild = node.children.length > 1;
   const hasOneChild = node.children.length === 1;
@@ -68,9 +68,7 @@ export function TreeNode({
 
   const allNodeHeight =
     (MARGIN_BETWEEN_NODES + NODE_HEIGHT) * countDescendants(node) -
-    (lastChildNode?.children.length === 0
-      ? NODE_HEIGHT / 2
-      : NODE_HEIGHT * lastChildNode?.children.length || 0);
+    (lastChildNode?.children.length === 0 ? NODE_HEIGHT / 2 : 0); // Adjust for last child without children
 
   return (
     <div className="relative pl-8">
@@ -90,7 +88,7 @@ export function TreeNode({
           }}
         ></div>
         <div
-          className={`relative before:content-[''] before:absolute before:-left-8 before:top-1/2 before:-translate-y-1/2 before:w-8 before:h-px before:bg-gray-200`}
+          className={`relative before:content-[''] before:absolute before:-left-8 before:top-1/2 before:-translate-y-1/2 before:w-8 before:h-px before:bg-red-500`}
         >
           <InputText
             value={fieldValue}
