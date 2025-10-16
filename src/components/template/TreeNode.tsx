@@ -45,50 +45,53 @@ export interface TreeNodeProps {
   treeLength: number;
 }
 
-const NODE_HEIGHT = 28; // Height of each node box in pixels
+const NODE_HEIGHT = 34; // Height of each node box in pixels
+const MARGIN_BETWEEN_NODES = 8; // Vertical margin between nodes in pixels
 
 export function TreeNode({
   node,
   onAdd,
   onDelete,
   onUpdate,
-  isLast,
   activeNodeId,
   setActiveNodeId,
   treeLength,
 }: TreeNodeProps) {
   const [fieldValue, setFieldValue] = useState(node.value);
 
-  const countDescendants = (n: TreeNodeType): number =>
-    n.children.reduce((acc, child) => acc + 1 + countDescendants(child), 0);
+  const countDescendants = (node: TreeNodeType): number =>
+    node.children.reduce((acc, child) => acc + 1 + countDescendants(child), 0);
 
-  const allNodeHeight = NODE_HEIGHT * countDescendants(node);
+  const hasMoreThanOneChild = node.children.length > 1;
+  const hasOneChild = node.children.length === 1;
+  const lastChildNode = node.children[node.children.length - 1];
+
+  const allNodeHeight =
+    (MARGIN_BETWEEN_NODES + NODE_HEIGHT) * countDescendants(node) -
+    (lastChildNode?.children.length === 0
+      ? NODE_HEIGHT / 2
+      : NODE_HEIGHT * lastChildNode?.children.length || 0);
 
   return (
-    <div className="relative pl-10">
+    <div className="relative pl-8">
       {/* Connector Lines */}
-
-      {node.label === "root" ? (
-        <span
-          className={`
-          absolute left-2 -top-[8px] bottom-0
-           ${isLast ? `!h-[${NODE_HEIGHT}px]` : `!h-[${allNodeHeight}px]`}
-          w-px bg-gray-200
-        `}
-        ></span>
-      ) : (
-        <span
-          className={`
-          absolute left-2 -top-[8px] bottom-0
-          ${isLast ? `!h-[${NODE_HEIGHT}px]` : ""}
-          w-px bg-gray-200
-        `}
-        ></span>
-      )}
 
       {/* Node Box */}
       <div className="flex items-center gap-2 mb-2 relative">
-        <div className="relative before:content-[''] before:absolute before:-left-8 before:top-1/2 before:-translate-y-1/2 before:w-8 before:h-px before:bg-gray-200">
+        {/* vertical line */}
+        <div
+          className={`absolute left-0 top-[34px] w-px bg-red-500`}
+          style={{
+            bottom: hasMoreThanOneChild
+              ? `-${allNodeHeight}px`
+              : hasOneChild
+              ? `-${NODE_HEIGHT - MARGIN_BETWEEN_NODES}px`
+              : "0px",
+          }}
+        ></div>
+        <div
+          className={`relative before:content-[''] before:absolute before:-left-8 before:top-1/2 before:-translate-y-1/2 before:w-8 before:h-px before:bg-gray-200`}
+        >
           <InputText
             value={fieldValue}
             onChange={(val) => {
@@ -110,7 +113,7 @@ export function TreeNode({
       </div>
 
       {/* Children */}
-      <div className="ml-8">
+      <div className="ml-0">
         {node.children.map((child, idx) => (
           <TreeNode
             key={child.id}
